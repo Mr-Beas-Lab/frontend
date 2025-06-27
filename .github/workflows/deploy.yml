@@ -97,10 +97,9 @@ jobs:
           docker logs frontend --tail 10 || echo "No logs available for frontend"
           
           # Check if container is running
-          RUNNING_CONTAINERS=$(docker-compose ps -q | wc -l)
-          EXPECTED_CONTAINERS=1  # frontend only
+          FRONTEND_CONTAINER=$(docker-compose ps -q frontend)
           
-          if [ "$RUNNING_CONTAINERS" -eq "$EXPECTED_CONTAINERS" ]; then
+          if [ -n "$FRONTEND_CONTAINER" ]; then
             echo "✅ Frontend deployment successful! Container is running."
             echo "🌐 Frontend available at: http://localhost:5000"
             
@@ -108,7 +107,7 @@ jobs:
             echo "🧹 Cleaning up old backup..."
             rm -rf frontend_backup
           else
-            echo "❌ Frontend deployment failed! Expected $EXPECTED_CONTAINERS container, but $RUNNING_CONTAINERS are running."
+            echo "❌ Frontend deployment failed! Frontend container is not running."
             echo "🔄 Rolling back to previous frontend..."
             rm -rf ./*
             cp -r frontend_backup/* .
