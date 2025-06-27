@@ -1,0 +1,10 @@
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #30c0f9;
+}
+body{
+  color: aliceblue;
+  background: #000;
+}
