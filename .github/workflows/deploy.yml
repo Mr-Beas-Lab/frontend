@@ -135,4 +135,4 @@ jobs:
           Server: ${{ secrets.SERVER_IP }}
           Path: ~/mrbeas/services/frontend
           
-          ${{ job.status == 'success' && 'Frontend deployment successful! Available at http://localhost:5000' || 'Frontend deployment failed! Check logs for details.' }} 
+          ${{ job.status == 'success' && 'Frontend deployment successful!|| 'Frontend deployment failed! Check logs for details.' }} 
