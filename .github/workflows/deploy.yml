@@ -56,59 +56,59 @@ jobs:
           cd ~/mrbeas/services/frontend
           
           # Create backup of current frontend
-          echo "📦 Creating backup of current frontend..."
+          echo "Creating backup of current frontend..."
           if [ -d "frontend_backup" ]; then
             rm -rf frontend_backup
           fi
           cp -r . frontend_backup
           
           # Pull the latest frontend image
-          echo "⬇️ Pulling latest frontend Docker image..."
+          echo "Pulling latest frontend Docker image..."
           docker pull ${{ env.FRONTEND_IMAGE }}:${{ env.DOCKER_TAG }}
           
           # Stop existing frontend container
-          echo "🛑 Stopping existing frontend container..."
+          echo "Stopping existing frontend container..."
           docker-compose down --timeout 30
           
           # Start new frontend container
-          echo "🚀 Starting new frontend container..."
+          echo "Starting new frontend container..."
           docker-compose up -d
           
           # Wait for container to start
-          echo "⏳ Waiting for frontend container to start..."
+          echo "Waiting for frontend container to start..."
           sleep 15
           
           # Check container status
-          echo "📊 Frontend Container Status:"
+          echo "Frontend Container Status:"
           docker-compose ps
           
           # Health check
-          echo "🏥 Running frontend health check..."
+          echo "Running frontend health check..."
           
           # Check Frontend
           if curl -f -s http://localhost:5000 > /dev/null; then
-            echo "✅ Frontend health check passed"
+            echo "Frontend health check passed"
           else
-            echo "❌ Frontend health check failed"
+            echo "Frontend health check failed"
           fi
           
           # Show recent logs
-          echo "📋 Recent frontend logs:"
+          echo "Recent frontend logs:"
           docker logs frontend --tail 10 || echo "No logs available for frontend"
           
           # Check if container is running
           FRONTEND_CONTAINER=$(docker-compose ps -q frontend)
           
           if [ -n "$FRONTEND_CONTAINER" ]; then
-            echo "✅ Frontend deployment successful! Container is running."
-            echo "🌐 Frontend available at: http://localhost:5000"
+            echo "Frontend deployment successful! Container is running."
+            echo "Frontend available at: http://localhost:5000"
             
             # Clean up old backup if deployment successful
-            echo "🧹 Cleaning up old backup..."
+            echo "Cleaning up old backup..."
             rm -rf frontend_backup
           else
-            echo "❌ Frontend deployment failed! Frontend container is not running."
-            echo "🔄 Rolling back to previous frontend..."
+            echo "Frontend deployment failed! Frontend container is not running."
+            echo "Rolling back to previous frontend..."
             rm -rf ./*
             cp -r frontend_backup/* .
             docker-compose up -d
@@ -122,17 +122,17 @@ jobs:
         to: ${{ secrets.CHAT_ID }}
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         message: |
-          🚀 **Frontend Deployment**
+          Frontend Deployment
           
-          **Repository:** ${{ github.repository }}
-          **Branch:** ${{ github.ref_name }}
-          **Commit:** ${{ github.sha }}
-          **Status:** ${{ job.status }}
+          Repository: ${{ github.repository }}
+          Branch: ${{ github.ref_name }}
+          Commit: ${{ github.sha }}
+          Status: ${{ job.status }}
           
-          **Image Built:**
-          • Frontend: ${{ env.FRONTEND_IMAGE }}:${{ env.DOCKER_TAG }}
+          Image Built:
+          - Frontend: ${{ env.FRONTEND_IMAGE }}:${{ env.DOCKER_TAG }}
           
-          **Server:** ${{ secrets.SERVER_IP }}
-          **Path:** ~/mrbeas/services/frontend
+          Server: ${{ secrets.SERVER_IP }}
+          Path: ~/mrbeas/services/frontend
           
-          ${{ job.status == 'success' && '✅ Frontend deployment successful! Available at http://localhost:5000' || '❌ Frontend deployment failed! Check logs for details.' }} 
+          ${{ job.status == 'success' && 'Frontend deployment successful! Available at http://localhost:5000' || 'Frontend deployment failed! Check logs for details.' }} 
