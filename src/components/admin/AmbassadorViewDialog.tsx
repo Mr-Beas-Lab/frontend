@@ -58,7 +58,7 @@ export default function AmbassadorViewDialog({ isOpen, onOpenChange, ambassador 
 
             <div>
               <p className="font-medium text-sm text-gray-500">KYC Status</p>
-              <p className="text-base">{ambassador.kycStatus || "pending"}</p>
+              <p className="text-base">{ambassador.kyc || "pending"}</p>
             </div>
             <div>
               <p className="font-medium text-sm text-gray-500">Created At</p>

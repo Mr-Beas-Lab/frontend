@@ -73,7 +73,7 @@ const AmbassadorDashboard: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Ambassador Dashboard</h1>
 
-      {ambassador?.kycStatus === "pending" && (
+      {ambassador?.kyc === "pending" && (
         <Alert variant="warning" className="mb-6">
           <Info className="h-4 w-4" />
           <AlertDescription>

@@ -75,7 +75,7 @@ export interface Ambassador {
   paymentMethods: PaymentMethod[] // Array of payment methods
   createdAt: Date
   role: string //  "ambassador", "admin"
-  kycStatus: string // "pending", "approved", "rejected", defaults to "pending"
+  kyc: string // "pending", "approved", "rejected", defaults to "pending"
 }
 
 export interface Country {
