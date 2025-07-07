@@ -233,7 +233,7 @@ const RecoveryManagement: React.FC = () => {
           <form onSubmit={handleAdjustBalance} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Telegram ID *
+                Sender Telegram ID *
               </label>
               <Input
                 type="text"
@@ -298,7 +298,7 @@ const RecoveryManagement: React.FC = () => {
           {selectedTask && (
             <div className="mb-4 p-3 bg-gray-900 border border-gray-700 rounded-md">
               <p className="text-sm text-white">
-                <strong>User:</strong> {selectedTask.telegramId}
+                <strong>Sender Telegram ID:</strong> {selectedTask.telegramId}
               </p>
               <p className="text-sm text-white">
                 <strong>Amount:</strong> {formatAmount(selectedTask.amount)}
