@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Ambassador } from '../../types';
 import { getAllAmbassadors, deleteAmbassador } from '../../api/ambassadorService';
-import { toast } from '../ui/use-toast';
+import { toast } from 'sonner';
 import { Alert, AlertDescription } from '../ui/alert';
 import { AlertTriangle, Loader2, Trash } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -39,11 +39,7 @@ export default function AmbassadorManagement() {
     } catch (error) {
       console.error("Error fetching ambassadors:", error);
       setApiStatus(false);
-      toast({
-        title: "Error",
-        description: "Failed to load ambassadors",
-        variant: "destructive",
-      });
+      toast.error("Failed to load ambassadors");
     } finally {
       setLoading(false);
     }
@@ -51,20 +47,12 @@ export default function AmbassadorManagement() {
 
   const handleDeleteConfirmation = (ambassadorUid: string) => {
     if (!ambassadorUid || ambassadorUid === 'undefined') {
-      toast({
-        title: "Error",
-        description: "Cannot delete ambassador: Invalid UID",
-        variant: "destructive",
-      });
+      toast.error("Cannot delete ambassador: Invalid UID");
       return;
     }
 
     if (ambassadorUid.length < 20 || ambassadorUid.includes('@')) {
-      toast({
-        title: "Error",
-        description: "Invalid Firebase UID format",
-        variant: "destructive",
-      });
+      toast.error("Invalid Firebase UID format");
       return;
     }
 
@@ -79,19 +67,12 @@ export default function AmbassadorManagement() {
     try {
       await deleteAmbassador(ambassadorToDelete);
       setAmbassadors(prev => prev.filter(amb => amb.uid !== ambassadorToDelete));
-      toast({
-        title: "Success",
-        description: "Ambassador deleted successfully",
-      });
+      toast.success("Ambassador deleted successfully");
       setIsDeleteDialogOpen(false);
       setAmbassadorToDelete(null);
     } catch (error) {
       console.error("Error deleting ambassador:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete ambassador",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete ambassador");
     } finally {
       setIsDeleting(false);
     }

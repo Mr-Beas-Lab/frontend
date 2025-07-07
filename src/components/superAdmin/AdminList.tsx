@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { Alert, AlertDescription } from '../ui/alert';
 import { getAdmins, deactivateAdmin, activateAdmin } from '../../api/adminService';
 import { AdminData } from '../../api/adminService';
 import { toast } from "sonner";
@@ -34,9 +35,7 @@ const AdminList = () => {
         setFilteredAdmins(processedData);
       } catch (error: any) {
         console.error('Error fetching admins:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to load admins';
-        setError(errorMessage);
-        toast.error(errorMessage);
+        setError('Network error. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -93,6 +92,14 @@ const AdminList = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4">
       <Card className="bg-black border-gray-800 text-white">
@@ -126,14 +133,10 @@ const AdminList = () => {
             </div>
           </div>
 
-          {isLoading ? (
-            <div className="flex justify-center items-center h-60">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-red-900 border border-red-700 text-white p-4 rounded-md">
-              {error}
-            </div>
+          {error ? (
+            <Alert variant="warning" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           ) : filteredAdmins.length === 0 ? (
             <div className="text-center p-6 border border-gray-800 rounded-md">
               <p className="text-white">No admins found</p>
