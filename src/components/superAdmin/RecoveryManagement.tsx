@@ -13,8 +13,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Badge } from '../ui/badge';
-import { Loader2, AlertTriangle, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
