@@ -1,228 +1,232 @@
 // ResetPassword.tsx
 import React, { useState, useEffect } from "react";
-import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
-import { auth } from "../firebase/firebaseConfig";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import axios from "axios";
+import config from "../api/config";
+import { toast } from "sonner";
 
 const ResetPassword: React.FC = () => {
-  const [newPassword, setNewPassword] = useState("");
+  console.log('ResetPassword component rendering');
+  
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Extract the oobCode from the URL
-  const oobCode = searchParams.get("oobCode");
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
+  
+  console.log('ResetPassword: searchParams =', searchParams.toString());
+  console.log('ResetPassword: token =', token);
+  console.log('ResetPassword: email =', email);
 
-  // Password validation states
-  const [validations, setValidations] = useState({
-    minLength: false,
-    hasNumber: false,
-    hasSpecial: false,
-    hasUpper: false,
-    hasLower: false,
-  });
-
-  // Verify the reset code on component mount
   useEffect(() => {
-    const verifyCode = async () => {
-      if (!oobCode) {
-        setError("Invalid reset link");
-        setIsLoading(false);
-        return;
-      }
+    console.log('ResetPassword: token =', token);
+    console.log('ResetPassword: email =', email);
+    
+    if (!token || !email) {
+      setError("Invalid reset link. Please request a new password reset.");
+    }
+  }, [token, email]);
 
-      try {
-        await verifyPasswordResetCode(auth, oobCode);
-        setIsLoading(false);
-      } catch (err) {
-        setError("This password reset link has expired or is invalid");
-        setIsLoading(false);
-      }
-    };
-
-    verifyCode();
-  }, [oobCode]);
-
-  // Validate password as user types
-  useEffect(() => {
-    setValidations({
-      minLength: newPassword.length >= 8,
-      hasNumber: /\d/.test(newPassword),
-      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
-      hasUpper: /[A-Z]/.test(newPassword),
-      hasLower: /[a-z]/.test(newPassword),
-    });
-  }, [newPassword]);
-
-  const isPasswordValid = () => {
-    return Object.values(validations).every(Boolean);
+  const validatePassword = (password: string) => {
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setMessage("");
     setIsSubmitting(true);
 
-    if (!isPasswordValid()) {
-      setError("Please ensure your password meets all requirements");
+    if (!token || !email) {
+      setError("Invalid reset link. Please request a new password reset.");
       setIsSubmitting(false);
       return;
     }
 
-    if (newPassword !== confirmPassword) {
+    if (password !== confirmPassword) {
       setError("Passwords do not match");
       setIsSubmitting(false);
       return;
     }
 
-    if (!oobCode) {
-      setError("Invalid reset link");
+    if (!validatePassword(password)) {
+      setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      await confirmPasswordReset(auth, oobCode, newPassword);
-      setMessage("Password reset successful! Redirecting to login...");
-      setTimeout(() => navigate("/login"), 3000);
-    } catch (err) {
-      console.error("Reset error:", err);
-      setError("Failed to reset password. The link may have expired or is invalid");
+      const response = await axios.post(`${config.API_BASE_URL}/auth/reset-password`, {
+        token,
+        newPassword: password,
+        email
+      });
+      
+      setSuccess(true);
+      toast.success("Password reset successful!");
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 400) {
+        setError("Invalid reset token or email");
+      } else if (err.response?.status === 500) {
+        setError("Server error. Please try again later");
+      } else if (err.code === 'ERR_NETWORK') {
+        setError("Network error. Please check your connection");
+      } else {
+        setError("An unexpected error occurred. Please try again");
+        console.error("Password reset error:", err);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(prev => !prev);
+  };
+
+  if (success) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full border border-gray-800 p-8 rounded-lg shadow-[0_0_20px_10px_rgba(0,0,0,0.1)]">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-white mb-4">
+              Password Reset Successful!
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Your password has been successfully reset. You will be redirected to the login page shortly.
+            </p>
+            <div className="flex justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Debug: Show if component is rendering
+  console.log('ResetPassword: Rendering main component');
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Create new password</h1>
-          <p className="text-sm text-gray-500">
-            Please ensure your new password meets all the requirements below
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-              New Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="newPassword"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                required
-                disabled={isSubmitting}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                required
-                disabled={isSubmitting}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">Password requirements:</p>
-            <ul className="space-y-1">
-              <li className={`text-sm ${validations.minLength ? "text-green-600" : "text-gray-500"}`}>
-                • At least 8 characters
-              </li>
-              <li className={`text-sm ${validations.hasUpper ? "text-green-600" : "text-gray-500"}`}>
-                • At least one uppercase letter
-              </li>
-              <li className={`text-sm ${validations.hasLower ? "text-green-600" : "text-gray-500"}`}>
-                • At least one lowercase letter
-              </li>
-              <li className={`text-sm ${validations.hasNumber ? "text-green-600" : "text-gray-500"}`}>
-                • At least one number
-              </li>
-              <li className={`text-sm ${validations.hasSpecial ? "text-green-600" : "text-gray-500"}`}>
-                • At least one special character
-              </li>
-            </ul>
-          </div>
-
-          {message && (
-            <div className="p-3 text-sm text-green-800 bg-green-50 rounded-md">
-              {message}
-            </div>
-          )}
-          
-          {error && (
-            <div className="p-3 text-sm text-red-800 bg-red-50 rounded-md">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting || !isPasswordValid()}
-            className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              "Reset Password"
+    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md mx-auto bg-black border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-2xl text-white text-center">Reset Password</CardTitle>
+          <CardDescription className="text-gray-400 text-center">
+            Enter your new password below
+          </CardDescription>
+        </CardHeader>
+        
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="bg-red-900/30 border border-red-900/50 text-red-400 p-3 rounded-md">
+                {error}
+              </div>
             )}
-          </button>
-        </form>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your new password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="bg-gray-900 border-gray-700 text-white pr-10"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters with uppercase, lowercase, and number
+              </p>
+            </div>
 
-        <div className="text-center">
-          <button
-            onClick={() => navigate("/login")}
-            className="text-sm text-gray-600 hover:text-gray-900"
-          >
-            Back to login
-          </button>
-        </div>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-white">Confirm New Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="bg-gray-900 border-gray-700 text-white pr-10"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col space-y-4">
+            <Button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                "Reset Password"
+              )}
+            </Button>
+            
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="link"
+                className="text-gray-400 hover:text-white transition-colors p-0 h-auto font-normal"
+                onClick={() => navigate("/login")}
+              >
+                Back to login
+              </Button>
+            </div>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 };

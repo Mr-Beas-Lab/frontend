@@ -122,7 +122,13 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     
-    if (error.error) {
+    // Check if the server provided a specific error message
+    if (error.response?.data?.message) {
+      throw { 
+        error: 'auth-error', 
+        message: error.response.data.message 
+      };
+    } else if (error.error) {
       throw error;
     } else if (error.response?.status === 401) {
       throw { 

@@ -9,6 +9,7 @@ import AmbassadorDashboard from "./pages/AmbassadorDashboard";
 import LoginPage from "./pages/Login";
 import AmbassadorRegister from "./pages/RegisterAmbasador";
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import KYCForm from "./components/kyc/KycForm";
 import AdminKYCReview from "./pages/AdminKYCReview";
 import { useAuth } from "./context/AuthContext";
@@ -39,6 +40,7 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/ambassador-register" element={<AmbassadorRegister />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
 
               {/* KYC Form Route */}

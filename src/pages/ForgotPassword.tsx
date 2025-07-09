@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { FirebaseError } from "firebase/app";
 import { Loader2 } from "lucide-react";
+import axios from "axios";
+import config from "../api/config";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -33,36 +32,23 @@ const ForgotPassword: React.FC = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, trimmedEmail, {
-        url: window.location.origin + '/login',
-        handleCodeInApp: true,
+      const response = await axios.post(`${config.API_BASE_URL}/auth/forgot-password`, {
+        email: trimmedEmail
       });
+      
       setMessage("Password reset link sent! Please check your email inbox and spam folder.");
-      // Don't redirect immediately to allow user to see the success message
-    } catch (err) {
-      if (err instanceof FirebaseError) {
-        switch (err.code) {
-          case "auth/user-not-found":
-            // For security reasons, show the same message as success
-            setMessage("If an account exists with this email, a password reset link will be sent.");
-            break;
-          case "auth/invalid-email":
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setMessage(err.response.data.message);
+      } else if (err.response?.status === 400) {
             setError("Please enter a valid email address");
-            break;
-          case "auth/too-many-requests":
-            setError("Too many attempts. Please try again later");
-            break;
-          case "auth/unauthorized-continue-uri":
-            setError("This domain is not authorized for password reset. Please contact support.");
-            console.error("Domain not whitelisted in Firebase:", window.location.origin);
-            break;
-          default:
-            setError("An error occurred. Please try again later");
-            console.error("Password reset error:", err);
-        }
+      } else if (err.response?.status === 500) {
+        setError("Server error. Please try again later");
+      } else if (err.code === 'ERR_NETWORK') {
+        setError("Network error. Please check your connection");
       } else {
         setError("An unexpected error occurred. Please try again");
-        console.error("Unexpected error:", err);
+        console.error("Password reset error:", err);
       }
     } finally {
       setIsSubmitting(false);
@@ -77,12 +63,12 @@ const ForgotPassword: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await sendPasswordResetEmail(auth, email.trim(), {
-        url: window.location.origin + '/login',
-        handleCodeInApp: true,
+      const response = await axios.post(`${config.API_BASE_URL}/auth/forgot-password`, {
+        email: email.trim()
       });
+      
       setMessage("Password reset link resent! Please check your email inbox and spam folder.");
-    } catch (err) {
+    } catch (err: any) {
       setError("Failed to resend reset link. Please try again");
       console.error("Resend error:", err);
     } finally {

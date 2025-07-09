@@ -49,8 +49,9 @@ const LoginForm: React.FC<LoginFormProps> = memo(({ onSuccess }) => {
         onSuccess();
       }
       navigate('/dashboard');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred during login';
+    } catch (err: any) {
+      // Handle both Error objects and custom error objects from auth API
+      const errorMessage = err.message || err.error?.message || 'An error occurred during login';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
