@@ -32,7 +32,7 @@ const ForgotPassword: React.FC = () => {
     }
 
     try {
-      const response = await axios.post(`${config.API_BASE_URL}/auth/forgot-password`, {
+      await axios.post(`${config.API_BASE_URL}/auth/forgot-password`, {
         email: trimmedEmail
       });
       
