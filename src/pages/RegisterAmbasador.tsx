@@ -331,7 +331,7 @@ export default function AmbassadorRegister() {
               )}
               {showLoginLink && (
                 <div className="mt-1">
-                  <Link to="/login" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">
+                  <Link to="/login" className="text-sm text-blue-light hover:text-blue-300 hover:underline">
                     Log in with this email instead
                   </Link>
                 </div>

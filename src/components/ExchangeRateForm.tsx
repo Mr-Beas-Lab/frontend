@@ -127,8 +127,8 @@ export const ExchangeRateForm: React.FC<ExchangeRateFormProps> = ({ country }) =
       </div>
 
       <Alert className="bg-blue-50 border-blue-200">
-        <Info className="h-4 w-4 text-blue-500" />
-        <AlertDescription className="text-blue-700">
+        <Info className="h-4 w-4 text-blue-light" />
+        <AlertDescription className="text-blue-light">
           A spread of {SPREAD} will be added to your entered rate. For example, if you enter 100, the final rate will be 114.
         </AlertDescription>
       </Alert>

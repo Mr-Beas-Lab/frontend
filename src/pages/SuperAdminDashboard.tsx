@@ -107,7 +107,7 @@ const SuperAdminHome: React.FC = () => {
               <h2 className="text-lg font-semibold text-white">Admin Management</h2>
               <p className="text-sm text-gray-400">Manage admin users</p>
             </div>
-            <Users className="h-8 w-8 text-blue-500" />
+            <Users className="h-8 w-8 text-blue-light" />
           </div>
           <Button 
             variant="outline" 

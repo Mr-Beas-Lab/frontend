@@ -331,7 +331,7 @@ const ReceiptList: React.FC<ReceiptListProps> = () => {
                       href={selectedReceipt.documents[0]} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                      className="inline-flex items-center text-blue-light hover:text-blue-800"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       View Receipt
@@ -348,26 +348,15 @@ const ReceiptList: React.FC<ReceiptListProps> = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === 'deposit' ? 'Confirm Deposit' : 'Confirm Rejection'}
+              {actionType === 'deposit' ? 'Confirm Approval' : 'Confirm Rejection'}
             </DialogTitle>
           </DialogHeader>
           {selectedReceipt && (
             <div className="space-y-4">
               <p>
-                Are you sure you want to {actionType === 'deposit' ? 'deposit' : 'reject'} this receipt?
+                Are you sure you want to {actionType === 'deposit' ? 'approve' : 'reject'} this receipt?
               </p>
-              {actionType === 'deposit' && exchangeRate && (
-                <div className="p-4   rounded-lg">
-                  <p className="text-sm text-gray-200">Exchange Rate: 1 USDC = {exchangeRate.rate.toFixed(2)} {exchangeRate.currencyCode}</p>
-                  <p className="text-sm text-gray-200">Amount: {selectedReceipt.amount.toFixed(2)} {exchangeRate.currencyCode}</p>
-                  <p className="font-medium">USDC Amount: {(selectedReceipt.amount / exchangeRate.rate).toFixed(2)} USDC</p>
-                </div>
-              )}
-              {actionType === 'deposit' && !exchangeRate && (
-                <div className="p-4 bg-yellow-100 rounded-lg">
-                  <p className="text-yellow-800">Please set your exchange rate before approving receipts</p>
-                </div>
-              )}
+              {/* Remove exchange rate and USDC info for ambassador approval */}
               <DialogFooter>
                 <Button
                   variant="outline"
@@ -378,10 +367,10 @@ const ReceiptList: React.FC<ReceiptListProps> = () => {
                 </Button>
                 <Button
                   onClick={actionType === 'deposit' ? handleDeposit : handleReject}
-                  disabled={isActionLoading || (actionType === 'deposit' && !exchangeRate)}
+                  disabled={isActionLoading}
                   className={actionType === 'deposit' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
                 >
-                  {isActionLoading ? 'Processing...' : actionType === 'deposit' ? 'Deposit' : 'Reject'}
+                  {isActionLoading ? 'Processing...' : actionType === 'deposit' ? 'Approve' : 'Reject'}
                 </Button>
               </DialogFooter>
             </div>

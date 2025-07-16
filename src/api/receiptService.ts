@@ -21,6 +21,10 @@ interface RejectReceiptRequest {
   reason?: string;
 }
 
+interface AdminApproveRequest {
+  receiptId: string;
+}
+
 // Response interfaces
 interface CreateReceiptResponse {
   success: boolean;
@@ -50,7 +54,6 @@ interface ReceiptActionResponse {
  * @returns List of all receipts
  */
 export const getAllReceipts = async (): Promise<Receipt[]> => {
-  // Temporary implementation until real API is ready
   try {
     const response = await apiClient.get('/receipts');
     return response.data || [];
@@ -134,7 +137,7 @@ export const createReceipt = async (data: CreateReceiptRequest): Promise<CreateR
  */
 export const approveReceipt = async (data: ApproveReceiptRequest): Promise<ReceiptActionResponse> => {
   try {
-    const response = await apiClient.post(`/receipts/approve/${data.receiptId}`, {
+    const response = await apiClient.post(`/receipts/ambassador-approve/${data.receiptId}`, {
       receiptId: data.receiptId,
       senderId: data.senderId,
       amount: data.amount
@@ -176,5 +179,27 @@ export const rejectReceipt = async (data: RejectReceiptRequest): Promise<Receipt
       throw new Error('You can only reject receipts that belong to you');
     }
     throw new Error('Failed to reject receipt. Please try again later.');
+  }
+};
+
+export const adminApproveReceipt = async (data: AdminApproveRequest): Promise<ReceiptActionResponse> => {
+  const response = await apiClient.post(`/receipts/admin-approve/${data.receiptId}`);
+  return response.data;
+};
+
+export const adminRejectReceipt = async (receiptId: string, reason?: string): Promise<ReceiptActionResponse> => {
+  const response = await apiClient.post(`/receipts/admin-reject/${receiptId}`, { reason });
+  return response.data;
+};
+
+export const getExchangeRateByCountry = async (country: string): Promise<number | null> => {
+  try {
+    const response = await apiClient.get(`/exchange-rates?country=${encodeURIComponent(country)}`);
+    if (Array.isArray(response.data) && response.data.length > 0) {
+      return response.data[0].rate;
+    }
+    return null;
+  } catch (error) {
+    return null;
   }
 }; 

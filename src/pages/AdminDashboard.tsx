@@ -24,6 +24,8 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { AdminDashboardSkeleton } from "../components/ui/SkeletonLoader";
+import { Input } from "../components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 export default function AdminDashboard() {
   const [ambassadors, setAmbassadors] = useState<Ambassador[]>([]);
@@ -44,6 +46,20 @@ export default function AdminDashboard() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [ambassadorToDelete, setAmbassadorToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Receipt filters
+  const [status, setStatus] = useState<'all'|'pending'|'ambassador_approved'|'admin_approved'|'rejected'>('all');
+  const [from, setFrom] = useState<Date|null>(null);
+  const [to, setTo] = useState<Date|null>(null);
+  const [term, setTerm] = useState('');
+
+  const filteredReceipts = receipts.filter(r => {
+    if (status !== 'all' && String(r.status).toLowerCase() !== String(status).toLowerCase()) return false;
+    if (from && new Date(r.createdAt) < from) return false;
+    if (to && new Date(r.createdAt) > to) return false;
+    if (term && !(`${r.ambassadorId ?? ''}${r.senderTgId ?? ''}${r.amount ?? ''}`.toLowerCase().includes(term.toLowerCase()))) return false;
+    return true;
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +87,8 @@ export default function AdminDashboard() {
           console.error("Error fetching receipts:", error);
           setApiStatus(prev => ({ ...prev, receipts: false }));
         }
+        // Remove the hardcoded filter so all receipts are available for filtering in the UI
+        setReceipts(receiptData);
         
         // Fetch KYC applications - only for stats, detailed review is on dedicated page
         let kycData: KYCApplication[] = [];
@@ -96,13 +114,7 @@ export default function AdminDashboard() {
           kycData = [];
         }
         
-        // Filter receipts - show only pending receipts
-        const filteredReceipts = receiptData.filter(receipt => 
-          receipt.status === "pending"
-        );
-
         setAmbassadors(ambassadorData);
-        setReceipts(filteredReceipts);
         setKYCApplications(kycData); 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -220,14 +232,6 @@ export default function AdminDashboard() {
   const approvedKycCount = kycApplications.filter(k => k.status === "APPROVED").length;
   const rejectedKycCount = kycApplications.filter(k => k.status === "REJECTED").length;
 
-  // Log the counts and array length for debugging
-  console.log('KYC applications array length:', kycApplications.length);
-  console.log('KYC counts:', { pendingKycCount, approvedKycCount, rejectedKycCount });
-  
-  // Debug individual status values if we have applications but no counts
-  if (kycApplications.length > 0 && pendingKycCount === 0 && approvedKycCount === 0 && rejectedKycCount === 0) {
-    console.log('KYC status values found:', kycApplications.map(k => k.status));
-  }
 
   return (
     <div className="container mx-auto p-4">
@@ -294,12 +298,42 @@ export default function AdminDashboard() {
               </AlertDescription>
             </Alert>
           )}
+          <div className="flex flex-wrap gap-4 mb-4 items-end">
+            <div>
+              <label className="block text-xs font-medium mb-1">Status</label>
+              <Select value={status} onValueChange={v => setStatus(v as "all" | "pending" | "ambassador_approved" | "admin_approved" | "rejected")}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-black">
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="ambassador_approved">Ambassador Approved</SelectItem>
+                  <SelectItem value="admin_approved">Admin Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">From</label>
+              <input type="date" className="input w-36" value={from ? from.toISOString().slice(0,10) : ''} onChange={e => setFrom(e.target.value ? new Date(e.target.value) : null)} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">To</label>
+              <input type="date" className="input w-36" value={to ? to.toISOString().slice(0,10) : ''} onChange={e => setTo(e.target.value ? new Date(e.target.value) : null)} />
+            </div>
+            <div className="flex-1 min-w-[180px]">
+              <label className="block text-xs font-medium mb-1">Search</label>
+              <Input value={term} onChange={e => setTerm(e.target.value)} placeholder="Ambassador, TG, amount..." />
+            </div>
+          </div>
           <ReceiptList
-            receipts={receipts}
+            receipts={filteredReceipts}
             onViewReceipt={(receipt) => {
               setCurrentReceipt(receipt);
               setIsReceiptViewOpen(true);
             }}
+            isLoading={loading}
           />
         </TabsContent>
 

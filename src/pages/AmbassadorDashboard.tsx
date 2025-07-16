@@ -12,7 +12,6 @@ import { Info } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import type { Ambassador } from "../types"
 import { AmbassadorDashboardSkeleton } from "../components/ui/SkeletonLoader"
-import ExternalWallet from '../components/ambassador/ExternalWallet'
 
 const AmbassadorDashboard: React.FC = () => {
   const [ambassador, setAmbassador] = useState<Ambassador | null>(null)
@@ -116,7 +115,6 @@ const AmbassadorDashboard: React.FC = () => {
           <TabsTrigger value="receipts">My Receipts</TabsTrigger>
           <TabsTrigger value="bankAccounts">Bank Accounts</TabsTrigger>
           <TabsTrigger value="exchangeRate">Exchange Rate</TabsTrigger>
-          <TabsTrigger value="externalWallet">External Wallet</TabsTrigger>
         </TabsList>
 
         <TabsContent value="receipts">
@@ -129,10 +127,6 @@ const AmbassadorDashboard: React.FC = () => {
 
         <TabsContent value="exchangeRate">
           <ExchangeRateForm country={ambassador?.country ?? ''} />
-        </TabsContent>
-
-        <TabsContent value="externalWallet">
-          <ExternalWallet />
         </TabsContent>
       </Tabs>
     </div>
