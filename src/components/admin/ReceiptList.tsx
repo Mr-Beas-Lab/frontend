@@ -134,24 +134,24 @@ export default function ReceiptList({
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
+    <Table>
+      <TableHeader>
+        <TableRow>
             <TableHead>Amount (Local Currency)</TableHead>
             <TableHead>Country</TableHead>
             <TableHead>Exchange Rate (USDC)</TableHead>
-            <TableHead>Ambassador</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
+          <TableHead>Ambassador</TableHead>
+          <TableHead>Date</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
           {receiptsState.map((receipt) => {
             const country = receipt.ambassadorId ? ambassadorCountries[receipt.ambassadorId] : undefined;
             const rate = country ? exchangeRates[country] : undefined;
             return (
-              <TableRow key={receipt.id}>
-                <TableCell>{receipt.amount.toFixed(2)}</TableCell>
+          <TableRow key={receipt.id}>
+            <TableCell>{receipt.amount.toFixed(2)}</TableCell>
                 <TableCell>
                   {receipt.ambassadorId ? (
                     loadingIds[receipt.ambassadorId] ? (
@@ -170,7 +170,7 @@ export default function ReceiptList({
                     ) : 'N/A'
                   ) : 'N/A'}
                 </TableCell>
-                <TableCell>
+            <TableCell>
                   {receipt.ambassadorId ? (
                     loadingIds[receipt.ambassadorId] ? (
                       <Loader2 className="h-4 w-4 animate-spin inline" />
@@ -178,12 +178,12 @@ export default function ReceiptList({
                       ambassadorNames[receipt.ambassadorId] || 'N/A'
                     )
                   ) : 'N/A'}
-                </TableCell>
-                <TableCell>{new Date(receipt.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <Button size="sm" variant="ghost" onClick={() => onViewReceipt(receipt)}>
-                    <EyeIcon className="h-4 w-4" />
-                  </Button>
+            </TableCell>
+            <TableCell>{new Date(receipt.createdAt).toLocaleDateString()}</TableCell>
+            <TableCell>
+              <Button size="sm" variant="ghost" onClick={() => onViewReceipt(receipt)}>
+                <EyeIcon className="h-4 w-4" />
+              </Button>
                   {receipt.status === 'ambassador_approved' && (
                     <Button size="sm" variant="default" className="ml-2" onClick={() => handleApprove(receipt)}>
                       Approve
@@ -195,12 +195,12 @@ export default function ReceiptList({
                   {receipt.status === 'rejected' && (
                     <Badge variant="destructive" className="ml-2">Rejected</Badge>
                   )}
-                </TableCell>
-              </TableRow>
+            </TableCell>
+          </TableRow>
             );
           })}
-        </TableBody>
-      </Table>
+      </TableBody>
+    </Table>
       <Dialog open={confirmDialog.open} onOpenChange={open => setConfirmDialog(prev => ({ ...prev, open }))}>
         <DialogContent>
           <DialogHeader>
